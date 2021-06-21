@@ -1,0 +1,17 @@
+C:\Users\hseccia\source\repos\Timely Travels\Timely Travels\bin\Debug\Timely Travels.exe.config
+C:\Users\hseccia\source\repos\Timely Travels\Timely Travels\bin\Debug\Timely Travels.exe
+C:\Users\hseccia\source\repos\Timely Travels\Timely Travels\bin\Debug\Timely Travels.pdb
+C:\Users\hseccia\source\repos\Timely Travels\Timely Travels\obj\Debug\Timely Travels.csproj.AssemblyReference.cache
+C:\Users\hseccia\source\repos\Timely Travels\Timely Travels\obj\Debug\MainWindow.g.cs
+C:\Users\hseccia\source\repos\Timely Travels\Timely Travels\obj\Debug\App.g.cs
+C:\Users\hseccia\source\repos\Timely Travels\Timely Travels\obj\Debug\Timely Travels_MarkupCompile.cache
+C:\Users\hseccia\source\repos\Timely Travels\Timely Travels\obj\Debug\Timely Travels_MarkupCompile.lref
+C:\Users\hseccia\source\repos\Timely Travels\Timely Travels\obj\Debug\MainWindow.baml
+C:\Users\hseccia\source\repos\Timely Travels\Timely Travels\obj\Debug\Timely Travels.g.resources
+C:\Users\hseccia\source\repos\Timely Travels\Timely Travels\obj\Debug\Timely_Travels.Properties.Resources.resources
+C:\Users\hseccia\source\repos\Timely Travels\Timely Travels\obj\Debug\Timely Travels.csproj.GenerateResource.cache
+C:\Users\hseccia\source\repos\Timely Travels\Timely Travels\obj\Debug\Timely Travels.csproj.CoreCompileInputs.cache
+C:\Users\hseccia\source\repos\Timely Travels\Timely Travels\obj\Debug\Timely Travels.exe
+C:\Users\hseccia\source\repos\Timely Travels\Timely Travels\obj\Debug\Timely Travels.pdb
+C:\Users\hseccia\source\repos\Timely Travels\Timely Travels\obj\Debug\MultipleSpotWindow.g.cs
+C:\Users\hseccia\source\repos\Timely Travels\Timely Travels\obj\Debug\MultipleSpotWindow.baml

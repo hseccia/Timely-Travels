@@ -1,0 +1,19 @@
+﻿<Window x:Name="Main_Menu" x:Class="Timely_Travels.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Timely_Travels"
+        mc:Ignorable="d"
+        Title="Timely Travels" Height="450" Width="800" ResizeMode="NoResize">
+    <Grid>
+        <Grid.Background>
+            <ImageBrush ImageSource="mainBackground.jpeg" Stretch="UniformToFill"/>
+        </Grid.Background>
+        <TextBlock x:Name="titleText" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="82,74,323,0" Height="80" Width="387" FontFamily="MV Boli" FontSize="40" FontWeight="Bold" Foreground="#FF000863">
+            Timely Travels</TextBlock>
+        <TextBlock x:Name="descriptionText" FontFamily="Constantia" FontSize="20" Margin="67,154,392,154.4" TextWrapping="WrapWithOverflow">Make sure you save miles on your vacation by calculating the shortest path to and fro!</TextBlock>
+        <Button x:Name="multipleSpotButton" Margin="156,264,506,124.4" Click="goToMultipleSpotWindow">Multiple Spot Trip</Button>
+        <Button x:Name="oneSpotButton" Margin="156,322,506,63.4" Click="goToOneSpotWindow">A-B One Spot Trip</Button>
+    </Grid>
+</Window>
