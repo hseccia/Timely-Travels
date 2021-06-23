@@ -5,13 +5,17 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Timely_Travels"
         mc:Ignorable="d"
-        Title="Timely Travels" Height="450" Width="800" ResizeMode="NoResize" PreviewKeyDown="addNode">
+        Title="Timely Travels" Height="450" Width="800" ResizeMode="NoResize" PreviewKeyDown="nodeManage">
     <Grid x:Name="mainGrid">
         <Grid.Background>
             <ImageBrush ImageSource="multipleTripBackground.jpg" Stretch="UniformToFill"/>
         </Grid.Background>
-        <TextBlock FontFamily="Georgia" FontSize="20" Margin="147,10,481,382">Location Names</TextBlock>
-        <TextBox x:Name="homeNameInputBox" Margin="147,44,580,347">Home</TextBox>
-        <Button x:Name="node0" Margin="365,202,365,188">Home</Button>
+        <TextBlock FontFamily="Georgia" FontSize="20" Margin="10,15,188,377">Location Names</TextBlock>
+        <TextBox x:Name="homeNameInputBox" Margin="10,44,692,347">Home</TextBox>
+        <Button x:Name="node0" Margin="383,269,306,117" Click="connectionHandle" RenderTransformOrigin="0.26,0.502">Home</Button>
+        <Button x:Name="changeNamesButton" Margin="161,44,516,347" Background="#FF959595" Click="changeNames">Change Names</Button>
+        <TextBlock FontFamily="Georgia" FontSize="14" TextWrapping="WrapWithOverflow" Margin="598,0,0,341">Press Space to add a location near your cursor.</TextBlock>
+        <TextBlock FontFamily="Georgia" FontSize="14" TextWrapping="WrapWithOverflow" Margin="598,49,0,308">Press X to delete the most recent location.</TextBlock>
+
     </Grid>
 </Window>
