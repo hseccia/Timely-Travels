@@ -16,6 +16,8 @@
         <Button x:Name="changeNamesButton" Margin="161,44,516,347" Background="#FF959595" Click="changeNames">Change Names</Button>
         <TextBlock FontFamily="Georgia" FontSize="14" TextWrapping="WrapWithOverflow" Margin="598,0,0,341">Press Space to add a location near your cursor.</TextBlock>
         <TextBlock FontFamily="Georgia" FontSize="14" TextWrapping="WrapWithOverflow" Margin="598,49,0,308">Press X to delete the most recent location.</TextBlock>
-
+        <Canvas x:Name="mainCanvas" Width="{Binding ElementName=mainGrid, Path=ActualWidth}" Height="{Binding ElementName=mainGrid, Path=ActualHeight}">
+            
+        </Canvas>
     </Grid>
 </Window>

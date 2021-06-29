@@ -50,6 +50,12 @@ namespace Timely_Travels
             {
                 connections.Add(c);
             }
+
+            public List<NodeConnection> GetConnections()
+            {
+                return connections;
+            }
+
         }
 
         protected class NodeConnection
@@ -59,7 +65,8 @@ namespace Timely_Travels
             
             public NodeConnection(Node firstNode, Node secondNode)
             {
-
+                connection[0] = firstNode;
+                connection[1] = secondNode;
             }
         }
 
@@ -77,11 +84,15 @@ namespace Timely_Travels
         private Dictionary<int, Node> nodeDictionary = new Dictionary<int, Node>();             //links nodes with their index 
         private Dictionary<int, string> nodeNameDictionary = new Dictionary<int, string>();     //links node names with their index 
 
-        private List<Button> nodeButtonArray = new List<Button>();
+        private List<Button> nodeButtonArray = new List<Button>();                              //UI control lists
         private List<TextBox> nodeNameTextBoxArray = new List<TextBox>();
         private Button[] selectedButtons = new Button[2];
+        private List<Line> connectionLines = new List<Line>();
 
         private int connectionIndex = 0;
+
+        private Point firstNodeLocation;
+        private Point secondNodeLocation;
 
 
         public MultipleSpotWindow()
@@ -89,13 +100,14 @@ namespace Timely_Travels
             InitializeComponent();
 
             distanceList.Add(0);
-            Node node0 = new Node();
-            node0.setName("Home");;
-            pathList.Add(node0);
-            nodeDictionary.Add(0, node0);
+            Node firstNode = new Node();
+            firstNode.setName("Home");;
+            pathList.Add(firstNode);
+            nodeDictionary.Add(0, firstNode);
             nodeNameDictionary.Add(0, "Home");
+            nodeButtonArray.Add(node0);
 
-            currentNode = node0;
+            currentNode = firstNode;
 
             selectedButtons[0] = null;                                          //make them null so comparing is easier; shows that they're both empty at initiation
             selectedButtons[1] = null;
@@ -115,8 +127,9 @@ namespace Timely_Travels
                 newButton.Content = "Node " + numOfNodesNoHome;
                 newButton.Width = 80;
                 newButton.Height = 35;
-                newButton.Margin = new Thickness(currentPos.X-300, currentPos.Y-300, 0, 0); 
-                mainGrid.Children.Add(newButton);
+                newButton.Margin = new Thickness(currentPos.X - 10, currentPos.Y - 10, 0, 0);
+                newButton.Click += connectionHandle;
+                mainCanvas.Children.Add(newButton);
                 nodeButtonArray.Add(newButton);
 
                 newButton = null;                                           //make null for garbage collection
@@ -148,11 +161,14 @@ namespace Timely_Travels
             {
                 if (numOfNodesNoHome > 0)
                 {
-                    mainGrid.Children.Remove(nodeButtonArray[numOfNodesNoHome - 1]);                //since node 0 aren't in these lists, go i-1
-                    mainGrid.Children.Remove(nodeNameTextBoxArray[numOfNodesNoHome - 1]);
+                    mainCanvas.Children.Remove(nodeButtonArray[numOfNodesNoHome]);                
+                    mainGrid.Children.Remove(nodeNameTextBoxArray[numOfNodesNoHome-1]);
+                    nodeButtonArray.RemoveAt(numOfNodesNoHome);
+                    nodeNameTextBoxArray.RemoveAt(numOfNodesNoHome-1);
 
                     nodeDictionary.Remove(numOfNodesNoHome);                                        //since node 0 is included, i matches actual index
                     distanceList.RemoveAt(numOfNodesNoHome);
+                    nodeNameDictionary.Remove(numOfNodesNoHome);
 
                     numOfNodesNoHome--;                                                             //decrease total number of nodes
                 }
@@ -175,29 +191,37 @@ namespace Timely_Travels
             {
                 for (int i = 1; i <= numOfNodesNoHome; i++)
                 {
-                    nodeDictionary[i].setName(nodeNameTextBoxArray[i - 1].Text);
+                    nodeDictionary[0].setName(homeNameInputBox.Text);
+                    node0.Content = homeNameInputBox.Text;
+                    nodeDictionary[i].setName(nodeNameTextBoxArray[i-1].Text);
                     nodeNameDictionary.Remove(i);                                                   //delete and re-add into dictionaries
-                    nodeNameDictionary.Add(i, nodeNameTextBoxArray[i - 1].Text);
-                    nodeButtonArray[i - 1].Content = nodeNameTextBoxArray[i - 1].Text;
+                    nodeNameDictionary.Add(i, nodeNameTextBoxArray[i-1].Text);
+                    nodeButtonArray[i].Content = nodeNameTextBoxArray[i-1].Text;
                 }
             }
         }
 
         private void connectionHandle(object sender, RoutedEventArgs e)
         {
+            var currentPos = Mouse.GetPosition(Application.Current.MainWindow);
+
             if (selectedButtons[0] == null)                 //represents adding the first button to be compared 
             {
+                firstNodeLocation = currentPos;
                 selectedButtons[0] = (Button)sender;        //sender = currently clicked button
+                Console.WriteLine("selected Button 0 + " + selectedButtons[0].Name);
             }
             else
             {
                 selectedButtons[1] = (Button)sender;
-                
+                Console.WriteLine("selected Button 0 + " + selectedButtons[0].Name);
+                Console.WriteLine("selected Button 1 + " + selectedButtons[1].Name);
+                secondNodeLocation = currentPos;
+
                 if (selectedButtons[1] == selectedButtons[0])           //if same button is clicked twice
                 {
                     MessageBox.Show("The target location on the route cannot be the same as the original location.", "Location Error");
-                    selectedButtons[0] = null;              //clear them
-                    selectedButtons[1] = null;
+
                 }
                 else if (selectedButtons[1] != selectedButtons[0])      //if different buttons are clicked
                 {
@@ -206,24 +230,62 @@ namespace Timely_Travels
                     selectedIndex1 = nodeNameDictionary.FindFirstKeyByValue(selectedButtons[1].Content.ToString());
                     Node firstNode = nodeDictionary[selectedIndex0];                        //get actual node from node dictionary with the index
                     Node secondNode = nodeDictionary[selectedIndex1];
-                    NodeConnection newConnection = new NodeConnection(firstNode, secondNode);
-                    firstNode.addConnection(newConnection);
-                    secondNode.addConnection(newConnection);
 
-                    nodeDictionary.Remove(selectedIndex0);                                  //remove and re-add updated nodes
-                    nodeDictionary.Add(selectedIndex0, firstNode);
-                    nodeDictionary.Remove(selectedIndex1);
-                    nodeDictionary.Add(selectedIndex1, secondNode);
+                    NodeConnection newConnection = new NodeConnection(firstNode, secondNode);
+                    NodeConnection newConnectionFind = new NodeConnection(secondNode, firstNode);       //a test connection to prevent duplicate connections; same connections but positions are switched
+
+                    if (firstNode.GetConnections().Count != 0 || secondNode.GetConnections().Count != 0)            //if one of the nodes has connections
+                    {
+                        if (firstNode.GetConnections().Contains(newConnection) || firstNode.GetConnections().Contains(newConnectionFind) || secondNode.GetConnections().Contains(newConnection) || secondNode.GetConnections().Contains(newConnectionFind))
+                            //statement is finding out if any sort of connection between node 1 and 2 has already been recorded
+                        {
+                            newConnection = null;
+                            newConnectionFind = null;
+                            MessageBox.Show("These locations are already connected to each other.", "Location Error");
+                        }
+                    }
+                    else
+                            //no record of the connection exists between the node
+                    {
+                        firstNode.addConnection(newConnection);
+                        secondNode.addConnection(newConnection);
+
+                        nodeDictionary.Remove(selectedIndex0);                                  //remove and re-add updated nodes
+                        nodeDictionary.Add(selectedIndex0, firstNode);
+                        nodeDictionary.Remove(selectedIndex1);
+                        nodeDictionary.Add(selectedIndex1, secondNode);
+
+
+                        connectionIndex++;
+
+                        Line newConnectionLine = new Line();
+                        newConnectionLine.X1 = firstNodeLocation.X;
+                        newConnectionLine.Y1 = firstNodeLocation.Y - 10;
+                        newConnectionLine.X2 = secondNodeLocation.X;
+                        newConnectionLine.Y2 = secondNodeLocation.Y - 10;
+                        newConnectionLine.Stroke = new SolidColorBrush(Colors.DarkSlateGray);
+                        newConnectionLine.StrokeThickness = 7;
+                        newConnectionLine.Name = "connection" + connectionIndex;
+                        mainCanvas.Children.Add(newConnectionLine);
+                        connectionLines.Add(newConnectionLine);
+
+                    }
+
 
                     firstNode = null;
                     secondNode = null;
 
-                    GC.Collect();
-                    GC.WaitForPendingFinalizers();
-                    
-
-
                 }
+
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+
+                selectedButtons[0] = null;              //clear them
+                selectedButtons[1] = null;
+
+                firstNodeLocation = new Point(0, 0);
+                secondNodeLocation = new Point(0, 0);
+
             }
         }
     }
