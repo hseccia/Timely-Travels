@@ -31,10 +31,10 @@ namespace Timely_Travels
     {
         protected class Node
         {
-            protected string name;
-            protected List<string> nearbyNodes = new List<string>();                                            //most likely get this from connections when it is current node
-            protected List<NodeConnection> connections = new List<NodeConnection>();
-            protected bool visited = false;                                                                     
+            private string name;
+            private List<string> nearbyNodes = new List<string>();                                            //most likely get this from connections when it is current node
+            private List<NodeConnection> connections = new List<NodeConnection>();
+            private bool visited = false;                                                                     
 
             public void setName(string n)
             {
@@ -51,27 +51,43 @@ namespace Timely_Travels
                 connections.Add(c);
             }
 
-            public List<NodeConnection> GetConnections()
+            public List<NodeConnection> getConnections()
             {
                 return connections;
+            }
+
+            public void removeConnection(Node nodeConnectedToThis)
+            {
+                for (int i = 0; i < connections.Count; i++)
+                {
+                    if (connections[i].getNodes()[0].getName() == nodeConnectedToThis.getName()
+                        || connections[i].getNodes()[1].getName() == nodeConnectedToThis.getName())
+                    {
+                        connections.RemoveAt(i);
+                    }
+                }
             }
 
         }
 
         protected class NodeConnection
         {
-            protected Node[] connection = new Node[2];
-            protected int length;
+            private Node[] connection = new Node[2];
             
             public NodeConnection(Node firstNode, Node secondNode)
             {
                 connection[0] = firstNode;
                 connection[1] = secondNode;
             }
+
+            public Node[] getNodes()
+            {
+                return connection;
+            }
         }
 
         private List<int> distanceList = new List<int>();                                      //list of distances along the path (created with the algorithm, all start at 0)
-        private List<Node> nodeList = new List<Node>();                                        //node list of list of nodes in dictionary (to be used at computation time)
+        private List<Node> nodeList = new List<Node>();                                        //node list of list of nodes in dictionary (to be used at computation time and for searching)
         private List<int> surroundList = new List<int>();                                      //a copy of nearby nodes
         private List<Node> pathList = new List<Node>();                                        
         private List<int> tempDistancesList = new List<int>();                                 //used when comparing potential paths to take
@@ -83,16 +99,21 @@ namespace Timely_Travels
 
         private Dictionary<int, Node> nodeDictionary = new Dictionary<int, Node>();             //links nodes with their index 
         private Dictionary<int, string> nodeNameDictionary = new Dictionary<int, string>();     //links node names with their index 
+        private List<NodeConnection> connectionList = new List<NodeConnection>();               //a list to keep general track of all connections (only used for finding most recent/first/2nd/etc connections)
 
         private List<Button> nodeButtonArray = new List<Button>();                              //UI control lists
         private List<TextBox> nodeNameTextBoxArray = new List<TextBox>();
         private Button[] selectedButtons = new Button[2];
         private List<Line> connectionLines = new List<Line>();
+        private List<TextBox> connectionDistanceTextBoxes = new List<TextBox>();
 
-        private int connectionIndex = 0;
 
-        private Point firstNodeLocation;
+        private int connectionIndex = 0;    
+
+        private Point firstNodeLocation;                                                        //location on the UI
         private Point secondNodeLocation;
+
+        private bool connectionAlreadyExists = false;
 
 
         public MultipleSpotWindow()
@@ -106,6 +127,7 @@ namespace Timely_Travels
             nodeDictionary.Add(0, firstNode);
             nodeNameDictionary.Add(0, "Home");
             nodeButtonArray.Add(node0);
+            nodeList.Add(firstNode);
 
             currentNode = firstNode;
 
@@ -139,6 +161,7 @@ namespace Timely_Travels
                 distanceList.Add(0);
                 nodeDictionary.Add(numOfNodesNoHome, newNode);
                 nodeNameDictionary.Add(numOfNodesNoHome, "Node " + numOfNodesNoHome);
+                nodeList.Add(newNode);
 
                 newNode = null;
 
@@ -161,22 +184,74 @@ namespace Timely_Travels
             {
                 if (numOfNodesNoHome > 0)
                 {
-                    mainCanvas.Children.Remove(nodeButtonArray[numOfNodesNoHome]);                
+                    mainCanvas.Children.Remove(nodeButtonArray[numOfNodesNoHome]);                  //Remove from UI and UI lists             
                     mainGrid.Children.Remove(nodeNameTextBoxArray[numOfNodesNoHome-1]);
                     nodeButtonArray.RemoveAt(numOfNodesNoHome);
                     nodeNameTextBoxArray.RemoveAt(numOfNodesNoHome-1);
 
-                    nodeDictionary.Remove(numOfNodesNoHome);                                        //since node 0 is included, i matches actual index
-                    distanceList.RemoveAt(numOfNodesNoHome);
+                    nodeList.RemoveAt(numOfNodesNoHome);                                            //remove from general node list
+                    distanceList.RemoveAt(numOfNodesNoHome);                                        //remove from distance list so it's not calculated
+                    
+
+                    for (int i = 0; i < nodeList.Count; i++)                                        //remove any other connections with that node
+                                                                                                    //(reference in node dict and numOfNodes kept for refernce in connection delete)
+                    {                                                                               //i = for each node (remember that deleted node is not included in this search)
+                       
+                        if (nodeList[i].getConnections().Count != 0)                                //make sure we're not going through empty connections to prevent out of range
+                        {
+                            for (int j = 0; j < nodeList[i].getConnections().Count; j++)                 //j = for each connection in node
+                            {
+                                if (nodeList[i].getConnections()[j].getNodes()[0].getName() == nodeDictionary[numOfNodesNoHome].getName()   //if the deleted node is found in a connection
+                                    || nodeList[i].getConnections()[j].getNodes()[1].getName() == nodeDictionary[numOfNodesNoHome].getName())
+                                {
+                                    nodeList[i].removeConnection(nodeDictionary[numOfNodesNoHome]);                                         //get out of the node list
+
+                                    for (int k = 0; k < connectionLines.Count; k++)                                                         //loop to find which lines to delete in general list and UI (not the most recent)
+                                    {
+                                        if (connectionList[k].getNodes()[0].getName() == nodeDictionary[numOfNodesNoHome].getName()         //if any connection contains the deleted node
+                                            || connectionList[k].getNodes()[1].getName() == nodeDictionary[numOfNodesNoHome].getName())
+                                        {
+                                            mainCanvas.Children.Remove(connectionLines[k]);                                                 //get rid of it
+                                            connectionLines.Remove(connectionLines[k]);
+                                            break;
+
+                                        }
+                                    }
+                                   
+                                    connectionIndex--;
+                                    break;
+
+                                }
+                            }
+                        }
+                    }
+
+                    nodeDictionary.Remove(numOfNodesNoHome);        //since we're done with the reference, delete it entirely now
                     nodeNameDictionary.Remove(numOfNodesNoHome);
 
-                    numOfNodesNoHome--;                                                             //decrease total number of nodes
+                    numOfNodesNoHome--;
                 }
                 else
                 {
                     MessageBox.Show("Cannot delete your home off the trip.", "Deletion Error");
                 }
 
+            }
+            else if (e.Key == Key.Z)
+            {
+                if (connectionIndex > 0)
+                { 
+
+                    Node firstNodeToRemove = connectionList[connectionIndex-1].getNodes()[0];
+                    Node secondNodeToRemove = connectionList[connectionIndex-1].getNodes()[1];
+
+                    mainCanvas.Children.Remove(connectionLines[connectionIndex-1]);
+                    connectionLines.Remove(connectionLines[connectionIndex-1]);
+                    firstNodeToRemove.removeConnection(secondNodeToRemove);
+                    secondNodeToRemove.removeConnection(firstNodeToRemove);
+
+                    connectionIndex--;
+                }
             }
         }
 
@@ -214,8 +289,6 @@ namespace Timely_Travels
             else
             {
                 selectedButtons[1] = (Button)sender;
-                Console.WriteLine("selected Button 0 + " + selectedButtons[0].Name);
-                Console.WriteLine("selected Button 1 + " + selectedButtons[1].Name);
                 secondNodeLocation = currentPos;
 
                 if (selectedButtons[1] == selectedButtons[0])           //if same button is clicked twice
@@ -232,20 +305,28 @@ namespace Timely_Travels
                     Node secondNode = nodeDictionary[selectedIndex1];
 
                     NodeConnection newConnection = new NodeConnection(firstNode, secondNode);
-                    NodeConnection newConnectionFind = new NodeConnection(secondNode, firstNode);       //a test connection to prevent duplicate connections; same connections but positions are switched
 
-                    if (firstNode.GetConnections().Count != 0 || secondNode.GetConnections().Count != 0)            //if one of the nodes has connections
+                    if (firstNode.getConnections().Count != 0 || secondNode.getConnections().Count != 0)            //if one of the nodes has connections
                     {
-                        if (firstNode.GetConnections().Contains(newConnection) || firstNode.GetConnections().Contains(newConnectionFind) || secondNode.GetConnections().Contains(newConnection) || secondNode.GetConnections().Contains(newConnectionFind))
-                            //statement is finding out if any sort of connection between node 1 and 2 has already been recorded
+
+                        for (int i = 0; i < firstNode.getConnections().Count; i++)                                  //check every connection in the first node
                         {
-                            newConnection = null;
-                            newConnectionFind = null;
-                            MessageBox.Show("These locations are already connected to each other.", "Location Error");
+                            if (firstNode.getConnections()[i].getNodes()[0].getName() == secondNode.getName()
+                                || firstNode.getConnections()[i].getNodes()[1].getName() == secondNode.getName())
+                            //statement is finding out if any sort of connection between node 1 and 2 has already been recorded
+                            {
+                                newConnection = null;
+                                MessageBox.Show("These locations are already connected to each other.", "Location Error");
+                                connectionAlreadyExists = true;
+                            }
+
                         }
+                        
+
                     }
-                    else
-                            //no record of the connection exists between the node
+
+                    if (!connectionAlreadyExists)
+                           //no record of the connection exists between the node
                     {
                         firstNode.addConnection(newConnection);
                         secondNode.addConnection(newConnection);
@@ -255,12 +336,11 @@ namespace Timely_Travels
                         nodeDictionary.Remove(selectedIndex1);
                         nodeDictionary.Add(selectedIndex1, secondNode);
 
+                        connectionList.Add(newConnection);                                      //add it to the general/searching list
 
-                        connectionIndex++;
-
-                        Line newConnectionLine = new Line();
+                        Line newConnectionLine = new Line();                                    //make a new UI line
                         newConnectionLine.X1 = firstNodeLocation.X;
-                        newConnectionLine.Y1 = firstNodeLocation.Y - 10;
+                        newConnectionLine.Y1 = firstNodeLocation.Y;
                         newConnectionLine.X2 = secondNodeLocation.X;
                         newConnectionLine.Y2 = secondNodeLocation.Y - 10;
                         newConnectionLine.Stroke = new SolidColorBrush(Colors.DarkSlateGray);
@@ -269,9 +349,16 @@ namespace Timely_Travels
                         mainCanvas.Children.Add(newConnectionLine);
                         connectionLines.Add(newConnectionLine);
 
+                       // TextBox newDistanceBox = new TextBox();
+                        //newDistanceBox.Margin = new Thickness(secondNodeLocation.X-firstNodeLocation.X, 0, secondNodeLocation.Y - firstNodeLocation.Y, 0);
+                        mainCanvas.Children.Add(newDistanceBox);
+
+                        connectionIndex++;
+
+
                     }
 
-
+                    connectionAlreadyExists = false;
                     firstNode = null;
                     secondNode = null;
 

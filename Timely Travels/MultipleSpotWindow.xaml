@@ -13,9 +13,10 @@
         <TextBlock FontFamily="Georgia" FontSize="20" Margin="10,15,188,377">Location Names</TextBlock>
         <TextBox x:Name="homeNameInputBox" Margin="10,44,692,347">Home</TextBox>
         <Button x:Name="node0" Margin="383,269,306,117" Click="connectionHandle" RenderTransformOrigin="0.26,0.502">Home</Button>
-        <Button x:Name="changeNamesButton" Margin="161,44,516,347" Background="#FF959595" Click="changeNames">Change Names</Button>
+        <Button x:Name="changeNamesButton" Margin="133,44,544,347" Background="#FF959595" Click="changeNames">Change Names</Button>
         <TextBlock FontFamily="Georgia" FontSize="14" TextWrapping="WrapWithOverflow" Margin="598,0,0,341">Press Space to add a location near your cursor.</TextBlock>
-        <TextBlock FontFamily="Georgia" FontSize="14" TextWrapping="WrapWithOverflow" Margin="598,49,0,308">Press X to delete the most recent location.</TextBlock>
+        <TextBlock FontFamily="Georgia" FontSize="14" TextWrapping="WrapWithOverflow" Margin="426,0,201,357">Press X to delete the most recent location.</TextBlock>
+        <TextBlock FontFamily="Georgia" FontSize="14" TextWrapping="WrapWithOverflow" Margin="261,0,373,382">Press Z to delete the most recent route.</TextBlock>
         <Canvas x:Name="mainCanvas" Width="{Binding ElementName=mainGrid, Path=ActualWidth}" Height="{Binding ElementName=mainGrid, Path=ActualHeight}">
             
         </Canvas>
